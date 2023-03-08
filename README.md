@@ -5,13 +5,13 @@ Implementation of two-view stereo and multi-view stereo algorithms to convert mu
 ![Alt text](output/multiviewSFM/input_images.png)
 
 ### **Disparity**: <br/>
-![Alt text](output/multiviewSFM/disparity.png)
+![Alt text](output/disparity.png)
 
 ### **Disparity and depth after post processing**: <br/>
 ![Alt text](output/multiviewSFM/disparity_after_postprocessing.png)
 
 ### **L-R Consistency check mask**: <br/>
-![Alt text](output/multiviewSFM/lr_consistency_check.png)
+![Alt text](output/LRconsistency.png)
 
 Reconstructed 3d model from 2 views using ZNCC Kernel -
 ![Alt text](output/multiviewSFM/zncc.png)
