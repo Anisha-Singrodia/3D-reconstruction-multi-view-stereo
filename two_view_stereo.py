@@ -64,12 +64,12 @@ def rectify_2view(rgb_i, rgb_j, R_irect, R_jrect, K_i, K_j, u_padding=20, v_padd
     K_j_corr[0, 2] -= u_padding
     K_j_corr[1, 2] -= vj_min + v_padding
 
-    """Student Code Starts"""
+    """Code Starts"""
     
     dsize=(w_max, h_max)
     rgb_i_rect = cv2.warpPerspective(rgb_i, K_i_corr@R_irect@np.linalg.inv(K_i), dsize)
     rgb_j_rect = cv2.warpPerspective(rgb_j, K_j_corr@R_jrect@np.linalg.inv(K_j), dsize)
-    """Student Code Ends"""
+    """Code Ends"""
 
     return rgb_i_rect, rgb_j_rect, K_i_corr, K_j_corr
 
@@ -89,12 +89,11 @@ def compute_right2left_transformation(R_wi, T_wi, R_wj, T_wj):
         p_i = R_ji @ p_j + T_ji, B is the baseline
     """
 
-    """Student Code Starts"""
-
-    """Student Code Ends"""
+    """Code Starts"""
     R_ji = np.matmul(R_wi, R_wj.T)
     T_ji = T_wi - np.matmul(R_ji, T_wj)
     B = np.linalg.norm(T_ji)
+    """Code Ends"""
 
     return R_ji, T_ji, B
 
@@ -117,7 +116,7 @@ def compute_rectification_R(T_ji):
     print(e_i)
     # ! Note, we define a small EPS at the beginning of this file, use it when you normalize each column
 
-    """Student Code Starts"""
+    """Code Starts"""
     if e_i[1]<0:
         e_i[1] = -e_i[1]
     print(e_i) 
@@ -131,7 +130,7 @@ def compute_rectification_R(T_ji):
     R_irect[2,:] = np.cross(R_irect[0,:], R_irect[1,:])
     print(R_irect)
 
-    """Student Code Ends"""
+    """Code Ends"""
 
     return R_irect
 
@@ -155,7 +154,7 @@ def ssd_kernel(src, dst):
     assert src.ndim == 3 and dst.ndim == 3
     assert src.shape[1:] == dst.shape[1:]
 
-    """Student Code Starts"""
+    """Code Starts"""
     M = src.shape[0]
     N = dst.shape[0]
     ssd = np.zeros((M,N))
@@ -163,7 +162,7 @@ def ssd_kernel(src, dst):
         for n in range(N):
             err = np.linalg.norm((src[m]-dst[n])[:,0])**2+np.linalg.norm((src[m]-dst[n])[:,1])**2+np.linalg.norm((src[m]-dst[n])[:,2])**2
             ssd[m][n] = err
-    """Student Code Ends"""
+    """Code Ends"""
 
     return ssd  # M,N
 
@@ -187,7 +186,7 @@ def sad_kernel(src, dst):
     assert src.ndim == 3 and dst.ndim == 3
     assert src.shape[1:] == dst.shape[1:]
 
-    """Student Code Starts"""
+    """Code Starts"""
     M = src.shape[0]
     N = dst.shape[0]
     sad = np.zeros((M,N))
@@ -195,7 +194,7 @@ def sad_kernel(src, dst):
         for n in range(N):
             err = np.linalg.norm((src[m]-dst[n])[:,0],1)+np.linalg.norm((src[m]-dst[n])[:,1],1)+np.linalg.norm((src[m]-dst[n])[:,2],1)
             sad[m][n] = err
-    """Student Code Ends"""
+    """Code Ends"""
 
     return sad  # M,N
 
@@ -219,7 +218,7 @@ def zncc_kernel(src, dst):
     assert src.ndim == 3 and dst.ndim == 3
     assert src.shape[1:] == dst.shape[1:]
 
-    """Student Code Starts"""
+    """Code Starts"""
     M = src.shape[0]
     N = dst.shape[0]
     zncc = np.zeros((M,N))
@@ -236,7 +235,7 @@ def zncc_kernel(src, dst):
                 err += (np.sum((src[m, :,i]-w1_)@((dst[n, :,i]-w2_).T)))/(sigma_w1*sigma_w2 + EPS)
             zncc[m][n] = err
 
-    """Student Code Ends"""
+    """Code Ends"""
 
     # ! note here we use minus zncc since we use argmin outside, but the zncc is a similarity, which should be maximized
     return zncc * (-1.0)  # M,N
@@ -256,7 +255,7 @@ def image2patch(image, k_size):
         The patch buffer for each pixel
     """
 
-    """Student Code Starts"""
+    """Code Starts"""
     H = image.shape[0]
     W = image.shape[1]
     print(image.shape)
@@ -279,7 +278,7 @@ def image2patch(image, k_size):
             temp = np.array(temp).reshape((-1,3))
             patch_buffer[h][w] = temp            
     print(patch_buffer.shape)
-    """Student Code Starts"""
+    """Code Starts"""
 
     return patch_buffer  # H,W,K**2,3
 
@@ -309,7 +308,7 @@ def compute_disparity_map(
         For each pixel, 1.0 if LR consistent, otherwise 0.0
     """
 
-    """Student Code Starts"""
+    """Code Starts"""
     H = rgb_i.shape[0]
     W = rgb_i.shape[1]
     print(H)
@@ -318,13 +317,6 @@ def compute_disparity_map(
     lr_consistency_mask = np.zeros((H, W))
     img_patch_i = img2patch_func(rgb_i.astype(float) / 255.0, k_size)
     img_patch_j = img2patch_func(rgb_j.astype(float) / 255.0, k_size)
-    # vi_idx, vj_idx = np.arange(H), np.arange(H)
-    # # print(vi_idx)
-
-    # disp_candidates = vi_idx[:, None] - vj_idx[None, :] + d0
-    # valid_disp_mask = disp_candidates > 0.0
-    # print(valid_disp_mask)
-    # print(d0)
     for w in range(W):
         left_patches = img_patch_i[:, w]
         right_patches = img_patch_j[:, w]
@@ -338,7 +330,7 @@ def compute_disparity_map(
                 lr_consistency_mask[h][w] = 1.0
             else:
                 lr_consistency_mask[h][w] = 0.0
-    """Student Code Ends"""
+    """Code Ends"""
 
     return disp_map, lr_consistency_mask
 
@@ -364,7 +356,7 @@ def compute_dep_and_pcl(disp_map, B, K):
         each pixel is the xyz coordinate of the back projected point cloud in camera frame
     """
 
-    """Student Code Starts"""
+    """Code Starts"""
     f = K[1][1]
     H = disp_map.shape[0]
     W = disp_map.shape[1]
@@ -380,7 +372,7 @@ def compute_dep_and_pcl(disp_map, B, K):
             x = x*dep_map[h][w]
             y = y*dep_map[h][w]
             xyz_cam[h][w] = [x, y, dep_map[h][w]]
-    """Student Code Ends"""
+    """Code Ends"""
 
     return dep_map, xyz_cam
 
@@ -437,7 +429,7 @@ def postprocess(
     pcl_cam = xyz_cam.reshape(-1, 3)[mask.reshape(-1) > 0]
     pcl_color = rgb.reshape(-1, 3)[mask.reshape(-1) > 0]
 
-    """Student Code Starts"""
+    """Code Starts"""
     print(pcl_cam.shape)
     pcl_world = np.zeros((pcl_cam.shape))
     for i in range(pcl_cam.shape[0]):
@@ -445,7 +437,7 @@ def postprocess(
         pcl_world[i][0] = a[0]
         pcl_world[i][1] = a[1]
         pcl_world[i][2] = a[2]
-    """Student Code Ends"""
+    """Code Ends"""
 
     # np.savetxt("./debug_pcl_world.txt", np.concatenate([pcl_world, pcl_color], -1))
     # np.savetxt("./debug_pcl_rect.txt", np.concatenate([pcl_cam, pcl_color], -1))
